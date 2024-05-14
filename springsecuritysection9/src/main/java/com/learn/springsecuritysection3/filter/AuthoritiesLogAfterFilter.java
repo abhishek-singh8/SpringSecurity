@@ -1,4 +1,4 @@
-package filter;
+package com.learn.springsecuritysection3.filter;
 
 
 import jakarta.servlet.*;

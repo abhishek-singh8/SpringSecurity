@@ -1,20 +1,18 @@
 package com.learn.springsecuritysection3.config;
 
-import filter.AuthoritiesLogAfterFilter;
-import filter.RequestValidationBeforeFilter;
+import com.learn.springsecuritysection3.filter.AuthoritiesLogAfterFilter;
+import com.learn.springsecuritysection3.filter.JWTTokenGenerationFilter;
+
+import com.learn.springsecuritysection3.filter.JWTTokenValidatorFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.provisioning.JdbcUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
-
-import javax.sql.DataSource;
 
 @Configuration
 public class ProjectSecurityConfig {
@@ -22,8 +20,11 @@ public class ProjectSecurityConfig {
     @Bean
     SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
         http.csrf((csrf) -> csrf.disable())
-                .addFilterBefore(new RequestValidationBeforeFilter(), BasicAuthenticationFilter.class)
+                .sessionManagement(sessionManagement -> sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .addFilterBefore(new filter.RequestValidationBeforeFilter(), BasicAuthenticationFilter.class)
                 .addFilterAfter(new AuthoritiesLogAfterFilter(),BasicAuthenticationFilter.class)
+                .addFilterAfter(new JWTTokenGenerationFilter(),BasicAuthenticationFilter.class)
+                .addFilterAfter(new JWTTokenValidatorFilter(),BasicAuthenticationFilter.class)
                 .authorizeHttpRequests((requests)->requests.
 //                        requestMatchers("/myAccount").hasAuthority("VIEWACCOUNT")
 //                       .requestMatchers("/myBalance").hasAnyAuthority("VIEWACCOUNT","VIEWBALANCE")
